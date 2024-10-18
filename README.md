@@ -2,10 +2,26 @@
 Notifies if new showtimes and theatres were listed in a given time.  
 
 Required Libraries:
-  Selenium (to scrape dynamic content)
-  Requests (for API calls)
-  Pushover or Twilio (for mobile notifications)
-
+```
+Selenium (to scrape dynamic content)
+Requests (for API calls)
+Pushover or Twilio (for mobile notifications)
+```
 Set up a Pushover account:
-  Go to Pushover, sign up, and create a new application.
-  Get your user_key and app_token from the dashboard.
+```
+Go to Pushover, sign up, and create a new application.
+Get your user_key and app_token from the dashboard.
+```
+## OUTPUT Sample in Pushover app
+
+### When a new theatre and show time were found from Previous Run 
+```
+"Mallikarjuna 70mm A/C DTS: Kukatpally": ["07:30 AM", "10:30 AM", "01:30 PM", "04:30 PM", "07:30 PM"],
+  "Viswanath 70MM Theatre: Kukatpally": ["08:00 AM", "11:00 AM", "02:00 PM", "05:00 PM"],
+  "Sree Ramulu 70mm 4k Laser: Moosapet": ["07:30 AM", "10:30 AM", "01:30 PM"],
+```
+
+### When no new listings were found
+```
+New showtimes added: {}
+```
