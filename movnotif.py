@@ -5,13 +5,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 # Pushover credentials (get from your pushover account)
-PUSHOVER_USER_KEY = 'un4onxmxgi6swa2pmpe6kr4qhiar3t'
-PUSHOVER_APP_TOKEN = 'ahs5cmqz5ec9tmru2h4ivqywfwfda3'
+PUSHOVER_USER_KEY = '' #User key
+PUSHOVER_APP_TOKEN = '' #APP token
 
-# URL of the BookMyShow movie page for the city
-MOVIE_URL = "https://in.bookmyshow.com/buytickets/mr-perfect-hyderabad/movie-hyd-ET00006900-MT/20241022"
 
-# Initialize Selenium WebDriver (SafariDriver since you are using Safari)
+MOVIE_URL = "" #movie link 
+
+
 driver = webdriver.Safari()
 
 def send_pushover_notification(message):
@@ -79,8 +79,8 @@ def main():
         else:
             print("No new updates.")
 
-        # Wait for 15 minutes before checking again
-        time.sleep(120)
+        # Wait for () minutes before checking again
+        time.sleep() # Give Time in Secs as per the need
 
 if __name__ == "__main__":
     main()
