@@ -1,5 +1,5 @@
 # BMS-Notification
-Notifies if new showtimes and theatres were listed in a given time.  
+Notifies if new showtimes and theatres were listed in a given time in Book My Show.  
 
 Required Libraries:
 ```
