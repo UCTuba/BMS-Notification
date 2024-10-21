@@ -4,11 +4,11 @@ from selenium.webdriver.common.by import By
 import requests
 
 # URL of the BookMyShow movie page for the city
-MOVIE_URL = "https://in.bookmyshow.com/buytickets/venom-the-last-dance-telugu-hyderabad/movie-hyd-ET00383478-MT/20241025"
+MOVIE_URL = ""
 
 # Pushover API credentials
-PUSHOVER_USER_KEY = 'un4onxmxgi6swa2pmpe6kr4qhiar3t'
-PUSHOVER_APP_TOKEN = 'ahs5cmqz5ec9tmru2h4ivqywfwfda3'
+PUSHOVER_USER_KEY = ''
+PUSHOVER_APP_TOKEN = ''
 
 # Initialize Selenium WebDriver (SafariDriver)
 driver = webdriver.Safari()
