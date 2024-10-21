@@ -25,3 +25,20 @@ Get your user_key and app_token from the dashboard.
 ```
 New showtimes added: {}
 ```
+> [!Note]
+> Error i'm facing 
+
+```
+error of block from site : Blocked from accessing BookMyShow. Please check manually.
+
+after first automation will try to tackle by different methonds in future:
+
+Usage of Proxies
+Randomizing Request Intervals
+Rotating User Agents
+Using Headless Browsing with Browser Detection Bypass
+Using a Residential IP or VPN
+Lowering the Scraping Frequency
+
+Check for Web API
+```
