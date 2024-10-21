@@ -3,14 +3,14 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import requests
 
-# URL of the BookMyShow movie page for the city
-MOVIE_URL = "https://in.bookmyshow.com/buytickets/venom-the-last-dance-3d-hyderabad/movie-hyd-ET00413299-MT/20241024"
+
+MOVIE_URL = "" #movie url
 
 # Pushover API credentials
-PUSHOVER_USER_KEY = 'un4onxmxgi6swa2pmpe6kr4qhiar3t'
-PUSHOVER_APP_TOKEN = 'ahs5cmqz5ec9tmru2h4ivqywfwfda3'
+PUSHOVER_USER_KEY = '' #user key 
+PUSHOVER_APP_TOKEN = '' #app token
 
-# Initialize Selenium WebDriver (SafariDriver)
+
 driver = webdriver.Safari()
 
 def send_notification(message):
@@ -31,25 +31,25 @@ def get_current_showtimes():
     """Scrape current theater and showtime listings from BookMyShow."""
     try:
         driver.get(MOVIE_URL)
-        time.sleep(5)  # Wait for the page to load fully
+        time.sleep(5)  
         
-        # Check if access is blocked (you may need to adjust this condition based on the page)
-        if "blocked" in driver.page_source.lower():  # Look for a keyword indicating blocked access
+        
+        if "blocked" in driver.page_source.lower():  
             return "blocked"
         
-        # Dismiss pop-ups (assuming 'Not Now' button has ID 'wzrk-cancel')
+
         try:
             not_now_button = driver.find_element(By.ID, 'wzrk-cancel')
             not_now_button.click()
         except:
-            pass  # Ignore if the button is not found
+            pass
 
-        # Scrape theater names
+       
         theater_elements = driver.find_elements(By.CSS_SELECTOR, 'a.__venue-name')
         theaters = [theater.text.strip() for theater in theater_elements if theater.text.strip()]
 
-        # Scrape showtimes and group them by theaters
-        showtime_blocks = driver.find_elements(By.CSS_SELECTOR, 'div.showtime-pill-wrapper')  # Parent of showtimes for each theater
+        
+        showtime_blocks = driver.find_elements(By.CSS_SELECTOR, 'div.showtime-pill-wrapper')  
         
         theater_showtimes = {}
         
@@ -62,7 +62,7 @@ def get_current_showtimes():
                     if any(am_pm in time_text for am_pm in ["AM", "PM"]):
                         showtimes.append(time_text)
             except IndexError:
-                pass  # If there's an indexing error, just skip the theater
+                pass  
             
             if not showtimes:
                 showtimes.append("No showtimes available")
@@ -75,7 +75,7 @@ def get_current_showtimes():
         return "error"
 
 def main():
-    previous_data = {}  # Store previously fetched showtimes
+    previous_data = {}  
     while True:
         current_showtimes = get_current_showtimes()
 
@@ -94,7 +94,7 @@ def main():
             send_notification("No new updates.")
         
         print("No new updates.")
-        time.sleep(300)  # Check every 5 minutes
+        time.sleep(300)  
 
 if __name__ == "__main__":
     main()
