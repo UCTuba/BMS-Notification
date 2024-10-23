@@ -6,24 +6,22 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import requests
 
-# URL of the BookMyShow movie page for the city
-MOVIE_URL = "https://in.bookmyshow.com/buytickets/venom-the-last-dance-3d-hyderabad/movie-hyd-ET00413299-MT/20241024"
+
+MOVIE_URL = "" #Paste URL of movie booking page 
 
 # Pushover API credentials
-PUSHOVER_USER_KEY = 'un4onxmxgi6swa2pmpe6kr4qhiar3t'
-PUSHOVER_APP_TOKEN = 'ahs5cmqz5ec9tmru2h4ivqywfwfda3'
+PUSHOVER_USER_KEY = ''
+PUSHOVER_APP_TOKEN = ''
 
 Ua = UserAgent()
-
-# Initialize Selenium WebDriver (SafariDriver)
 driver = webdriver.Safari()
 
-# Initialize the SQLite database
+
 def create_database():
-    conn = sqlite3.connect('venom3dE.db')
+    conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     
-    # Create table if it doesn't exist
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS showtimes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +34,7 @@ def create_database():
     conn.commit()
     return conn
 
-# Store showtimes in the database
+
 def store_showtimes(conn, theater_showtimes):
     cursor = conn.cursor()
     for theater, showtimes in theater_showtimes.items():
@@ -44,14 +42,14 @@ def store_showtimes(conn, theater_showtimes):
                 cursor.execute('''
                 INSERT OR IGNORE INTO showtimes (theater, showtime) 
                 VALUES (?, ?)
-            ''', (theater, showtime))  # Insert only if not exists
+            ''', (theater, showtime))  
     conn.commit()
 
-# Get existing showtimes from the database
+
 def get_existing_showtimes(conn):
     cursor = conn.cursor()
     cursor.execute('SELECT theater, showtime FROM showtimes')
-    # Convert to a dictionary with lists of showtimes for each theater
+
     existing_showtimes = {}
     for theater, showtime in cursor.fetchall():
         if theater not in existing_showtimes:
@@ -62,8 +60,8 @@ def get_existing_showtimes(conn):
 
 def send_notification(message):
     """Send a notification via Pushover."""
-    MAX_MESSAGE_LENGTH = 1024  # Pushover message limit
-    # Split the message if it exceeds the maximum allowed length
+    MAX_MESSAGE_LENGTH = 1024  
+
     if len(message) > MAX_MESSAGE_LENGTH:
         parts = [message[i:i+MAX_MESSAGE_LENGTH] for i in range(0, len(message), MAX_MESSAGE_LENGTH)]
         for part in parts:
@@ -94,47 +92,47 @@ def scroll_page(driver):
     last_height = driver.execute_script("return document.body.scrollHeight")
     
     while True:
-        # Scroll down to the bottom
+        
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        # Wait for new content to load
+        
         time.sleep(5)
 
-        # Calculate new scroll height and compare with the last height
+        
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
-            break  # If height hasn't changed, stop scrolling
+            break  
         last_height = new_height
 
 def get_current_showtimes():
     """Scrape current theater and showtime listings from BookMyShow."""
     try:
         driver.get(MOVIE_URL)
-        time.sleep(random.uniform(5, 15))  # Wait for the page to load fully
+        time.sleep(random.uniform(5, 15)) 
         
-        # Check if access is blocked (you may need to adjust this condition based on the page)
-        if "blocked" in driver.page_source.lower():  # Look for a keyword indicating blocked access
+
+        if "blocked" in driver.page_source.lower():  
             return "blocked"
         
-        # Dismiss pop-ups (assuming 'Not Now' button has ID 'wzrk-cancel')
+
         try:
             not_now_button = driver.find_element(By.ID, 'wzrk-cancel')
             not_now_button.click()
         except:
-            pass  # Ignore if the button is not found
+            pass
 
         scroll_page(driver)
 
-        # Scrape theater names
+
         theater_elements = driver.find_elements(By.CSS_SELECTOR, 'a.__venue-name')
         theaters = [theater.text.strip() for theater in theater_elements if theater.text.strip()]
 
-        # Scrape showtimes and group them by theaters
-        showtime_blocks = driver.find_elements(By.CSS_SELECTOR, 'div.showtime-pill-wrapper')  # Parent of showtimes for each theater
+
+        showtime_blocks = driver.find_elements(By.CSS_SELECTOR, 'div.showtime-pill-wrapper')  
         
         theater_showtimes = {}
         
         for idx, theater in enumerate(theaters):
-            print(f"Scraping theater {theater} ({idx + 1}/{len(theaters)})")  # Logging progress
+            print(f"Scraping theater {theater} ({idx + 1}/{len(theaters)})")  
             showtimes = set()
             try:
                 showtime_elements = showtime_blocks[idx].find_elements(By.CSS_SELECTOR, 'div.__text')
@@ -143,7 +141,7 @@ def get_current_showtimes():
                     if any(am_pm in time_text for am_pm in ["AM", "PM"]):
                         showtimes.add(time_text)
             except IndexError:
-                pass  # If there's an indexing error, just skip the theater
+                pass  
             
             if not showtimes:
                 showtimes.add("No showtimes available")
@@ -156,16 +154,13 @@ def get_current_showtimes():
         return "error"
 
 def main():
-    conn = create_database()  # Initialize the database
-    previous_data = get_existing_showtimes(conn)  # Load existing showtimes from the database
+    conn = create_database()  
+    previous_data = get_existing_showtimes(conn)  
 
     while True:
         current_showtimes = get_current_showtimes()
-
-        if current_showtimes == "blocked":
-            send_notification("Blocked from accessing BookMyShow. Please check manually.")
-            break  # Terminate script
-        elif current_showtimes == "error":
+        
+        if current_showtimes == "error":
             send_notification("An error occurred while scraping the site.")
             break  # Terminate script
         else:
@@ -178,15 +173,15 @@ def main():
                 if added_showtimes:
                     new_showtimes[theater] = sorted(added_showtimes)
 
-            # Check if there are any new showtimes to notify
+            
             if new_showtimes:
-                # Send notifications for new showtimes
+                
                 message = "New showtimes added:\n"
                 for theater, showtimes in new_showtimes.items():
                     message += f"{theater}: {', '.join(showtimes)}\n"
                 send_notification(message)
 
-                # Store current showtimes in the database
+                
                 store_showtimes(conn, current_showtimes)
 
                 for theater, showtimes in current_showtimes.items():
@@ -195,16 +190,16 @@ def main():
                     else:
                         previous_data[theater].extend(showtimes)
 
-                # Remove duplicates from previous_data
+               
                 for theater in previous_data:
                     previous_data[theater] = sorted(set(previous_data[theater]))
 
 
             else:
-                print("No new updates.")  # Don't send notifications if no updates
-                send_notification("No new updates.")  # Send notification for no updates
-
-        #time.sleep(300)  # Check every 5 minutes
+                print("No new updates.")  
+                send_notification("No new updates.")  
+            break
+ 
 
     conn.close()  # Close the database connection
 
